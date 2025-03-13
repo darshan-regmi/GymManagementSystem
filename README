@@ -1,0 +1,104 @@
+# Gym Management System
+
+## 📌 Overview
+The **Gym Management System** is a Java-based application designed to manage gym memberships efficiently. It allows users to register as **Regular Members** or **Premium Members**, track payments, upgrade plans, and monitor attendance.
+
+---
+## 🛠️ Features
+✅ Member Registration (Regular & Premium Members)  
+✅ Payment Tracking & Discounts  
+✅ Membership Plan Upgrades  
+✅ Attendance Tracking & Loyalty Points  
+✅ Personal Trainer Assignments (Premium Members)  
+✅ GUI for User-Friendly Interaction  
+✅ File Handling for Persistent Data  
+
+---
+## 📂 Project Structure
+```
+GymManagementSystem/
+├── GymManagementSystem.iml
+├── out/
+│   └── production/GymManagementSystem/
+│       ├── GymGUI.class
+│       ├── GymGUI$1.class
+│       ├── GymMember.class
+│       ├── PremiumMember.class
+│       └── RegularMember.class
+├── README
+└── src
+    ├── GymGUI.java
+    ├── GymMember.java
+    ├── PremiumMember.java
+    └── RegularMember.java
+```
+---
+## 🔧 Setup & Installation
+### Prerequisites
+- Java Development Kit (JDK 11 or later)
+- IntelliJ IDEA or any Java IDE
+
+### Steps to Run
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/your-repo/gym-management.git
+   ```
+2. Open the project in your IDE.
+3. Compile and run `GymGUI.java`.
+
+---
+## 📜 Class Descriptions
+### `GymMember.java`
+- Base class for all members.
+- Tracks member ID, name, contact details, and attendance.
+- Methods: `markAttendance()`, `resetMember()`, `display()`.
+
+### `RegularMember.java`
+- Inherits from `GymMember`.
+- Tracks membership plan, referral source, and loyalty points.
+- Methods: `upgradePlan()`, `resetMember()`, `display()`.
+
+### `PremiumMember.java`
+- Inherits from `GymMember`.
+- Tracks premium charges, personal trainers, and discounts.
+- Methods: `payDueAmount()`, `calculateDiscount()`, `revertPremiumMember()`, `display()`.
+
+### `GymGUI.java`
+- Manages the graphical user interface.
+- Handles user interactions and member management.
+
+---
+## 🚀 Future Enhancements
+### 🔹 Fix Discount Logic
+- Ensure `calculateDiscount()` properly applies the discount.
+- Modify payment tracking to reflect discount reductions.
+
+### 🔹 Improve Revert Method
+- Ensure `revertPremiumMember()` resets all relevant attributes.
+
+### 🔹 Implement `toString()` Methods
+- Override `toString()` in each class for better object representation.
+
+### 🔹 Add Setters for Important Attributes
+- Allow modification of name, location, phone, and email.
+
+### 🔹 Auto-Activate Membership on Creation (Optional)
+- New members should be active by default.
+
+### 🔹 Improve Error Handling & Input Validation
+- Validate user inputs and handle invalid cases gracefully.
+
+### 🔹 Enhance File Handling
+- Implement methods for saving and loading member details from files.
+
+### 🔹 Improve UI/UX
+- Add confirmation dialogs before deleting/upgrading members.
+- Display dynamic success/error messages.
+
+---
+## 📞 Contact
+**Author:** Darshan Regmi  
+📧 **Program-Related Inquiries:** regmidarshan545@gmail.com  
+📧 **Work & Hiring:** regmidarshan.work@gmail.com  
+🌐 **Website:** [darshanregmi.com.np](https://darshanregmi.com.np/)
+
