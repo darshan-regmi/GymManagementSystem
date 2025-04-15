@@ -21,6 +21,12 @@ public class RegularMember extends GymMember {
     public double getPlanPrice() { return planPrice; }
     public String getReferralSource() { return referralSource; }
     public int getLoyaltyPoints() { return loyaltyPoints; }
+    
+    // Setters
+    public void setPlan(String plan) {
+        this.plan = plan;
+        setPlanPrice();
+    }
 
     private void setPlanPrice() {
         switch(plan.toLowerCase()) {
@@ -61,17 +67,25 @@ public class RegularMember extends GymMember {
         }
     }
 
+    @Override
     public void resetMember() {
         super.resetMember();
         this.loyaltyPoints = 0;
+        this.plan = "basic";
+        this.setPlanPrice();
     }
 
     @Override
     public void display() {
-        super.display();
-        System.out.println("Plan: " + plan);
-        System.out.println("Plan Price: " + planPrice);
-        System.out.println("Referral Source: " + referralSource);
-        System.out.println("Loyalty Points: " + loyaltyPoints);
+        System.out.println(this.toString());
+    }
+    
+    @Override
+    public String toString() {
+        return super.toString() +
+               "\nPlan: " + plan +
+               "\nPlan Price: " + planPrice +
+               "\nReferral Source: " + referralSource +
+               "\nLoyalty Points: " + loyaltyPoints;
     }
 }

@@ -1,4 +1,6 @@
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GymMember {
     private String id;
@@ -11,6 +13,7 @@ public class GymMember {
     private LocalDate membershipStartDate;
     private boolean isActive;
     private int attendance;
+    private List<LocalDate> attendanceRecords;
 
     public GymMember(String id, String name, String location, String phone, 
                      String email, String gender, LocalDate dob, LocalDate membershipStartDate) {
@@ -24,6 +27,7 @@ public class GymMember {
         this.membershipStartDate = membershipStartDate;
         this.isActive = false;
         this.attendance = 0;
+        this.attendanceRecords = new ArrayList<>();
     }
 
     // Getters
@@ -37,6 +41,13 @@ public class GymMember {
     public LocalDate getMembershipStartDate() { return membershipStartDate; }
     public boolean isActive() { return isActive; }
     public int getAttendance() { return attendance; }
+    public List<LocalDate> getAttendanceRecords() { return attendanceRecords; }
+    
+    // Setters
+    public void setName(String name) { this.name = name; }
+    public void setLocation(String location) { this.location = location; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public void setEmail(String email) { this.email = email; }
 
     // Methods
     public void activateMembership() {
@@ -50,24 +61,31 @@ public class GymMember {
     public void markAttendance() {
         if (isActive) {
             this.attendance++;
+            this.attendanceRecords.add(LocalDate.now());
         }
     }
 
     public void resetMember() {
         this.isActive = false;
         this.attendance = 0;
+        this.attendanceRecords.clear();
     }
 
     public void display() {
-        System.out.println("Member ID: " + id);
-        System.out.println("Name: " + name);
-        System.out.println("Location: " + location);
-        System.out.println("Phone: " + phone);
-        System.out.println("Email: " + email);
-        System.out.println("Gender: " + gender);
-        System.out.println("Date of Birth: " + dob);
-        System.out.println("Membership Start Date: " + membershipStartDate);
-        System.out.println("Active Status: " + isActive);
-        System.out.println("Attendance: " + attendance);
+        System.out.println(this.toString());
+    }
+    
+    @Override
+    public String toString() {
+        return "Member ID: " + id +
+               "\nName: " + name +
+               "\nLocation: " + location +
+               "\nPhone: " + phone +
+               "\nEmail: " + email +
+               "\nGender: " + gender +
+               "\nDate of Birth: " + dob +
+               "\nMembership Start Date: " + membershipStartDate +
+               "\nActive Status: " + isActive +
+               "\nAttendance: " + attendance;
     }
 }

@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import javax.swing.*;
 
@@ -34,6 +35,7 @@ public class GymGUI extends JFrame {
         setTitle("Gym Management System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         initializeComponents();
+        loadMembersFromFile(); // Load members when application starts
         pack();
         setLocationRelativeTo(null);
         setMinimumSize(new Dimension(800, 600));
@@ -515,6 +517,95 @@ public class GymGUI extends JFrame {
             readFrame.setVisible(true);
         } catch (IOException e) {
             showError("Error reading from file: " + e.getMessage());
+        }
+    }
+    
+    // New method to load members from file when application starts
+    private void loadMembersFromFile() {
+        File file = new File("MemberDetails.txt");
+        if (!file.exists()) {
+            return; // No file to load
+        }
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            // Skip the header line
+            reader.readLine();
+            
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\s+");
+                if (parts.length < 14) continue; // Skip invalid lines
+                
+                int index = 0;
+                String id = parts[index++];
+                String name = parts[index++];
+                String location = parts[index++];
+                String phone = parts[index++];
+                String email = parts[index++];
+                
+                // Parse membership start date
+                LocalDate membershipStartDate;
+                try {
+                    membershipStartDate = LocalDate.parse(parts[index++], formatter);
+                } catch (Exception e) {
+                    continue; // Skip if date parsing fails
+                }
+                
+                String plan = parts[index++];
+                double price = Double.parseDouble(parts[index++]);
+                int attendance = Integer.parseInt(parts[index++]);
+                int loyaltyPoints = Integer.parseInt(parts[index++]);
+                boolean isActive = Boolean.parseBoolean(parts[index++]);
+                boolean isFullPayment = Boolean.parseBoolean(parts[index++]);
+                double discountAmount = Double.parseDouble(parts[index++]);
+                double netAmount = Double.parseDouble(parts[index++]);
+                
+                // Create appropriate member type
+                GymMember member;
+                if (plan.equals("Premium")) {
+                    // Assume a default trainer name for now
+                    member = new PremiumMember(id, name, location, phone, email, "Male", 
+                                              LocalDate.now(), membershipStartDate, "Default Trainer");
+                    
+                    PremiumMember pm = (PremiumMember) member;
+                    // Set payment details
+                    if (netAmount > 0) {
+                        pm.payDueAmount(netAmount);
+                    }
+                    if (isFullPayment) {
+                        // The discount is already applied in the saved amount
+                        ((PremiumMember) member).calculateDiscount();
+                    }
+                } else {
+                    // Regular member
+                    member = new RegularMember(id, name, location, phone, email, "Male", 
+                                              LocalDate.now(), membershipStartDate, plan, "Direct");
+                    
+                    // Set loyalty points
+                    for (int i = 0; i < loyaltyPoints / 5; i++) {
+                        ((RegularMember) member).markAttendance();
+                    }
+                }
+                
+                // Set common properties
+                if (isActive) {
+                    member.activateMembership();
+                }
+                
+                // Set attendance
+                for (int i = 0; i < attendance; i++) {
+                    member.markAttendance();
+                }
+                
+                // Add to members list
+                members.add(member);
+            }
+            
+            showSuccess("Successfully loaded " + members.size() + " members from file.");
+        } catch (IOException e) {
+            showError("Error loading members from file: " + e.getMessage());
         }
     }
     

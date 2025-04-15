@@ -38,6 +38,11 @@ public class PremiumMember extends GymMember {
         this.paidAmount += payment;
         this.isFullPayment = (this.paidAmount == premiumCharge);
         
+        // If full payment is made, calculate and apply discount automatically
+        if (this.isFullPayment) {
+            calculateDiscount();
+        }
+        
         double remainingAmount = premiumCharge - this.paidAmount;
         return String.format("Payment successful! Remaining amount to be paid: %.2f", remainingAmount);
     }
@@ -45,7 +50,8 @@ public class PremiumMember extends GymMember {
     public String calculateDiscount() {
         if (isFullPayment) {
             this.discountAmount = premiumCharge * 0.10; // 10% discount
-            return String.format("Discount calculated successfully! Discount amount: %.2f", discountAmount);
+            this.paidAmount -= discountAmount; // Apply discount
+            return String.format("Discount applied! Final paid amount: %.2f", paidAmount);
         }
         return "No discount available. Complete the full payment first!";
     }
@@ -60,16 +66,16 @@ public class PremiumMember extends GymMember {
 
     @Override
     public void display() {
-        super.display();
-        System.out.println("Personal Trainer: " + personalTrainer);
-        System.out.println("Paid Amount: " + paidAmount);
-        System.out.println("Payment Status: " + (isFullPayment ? "Complete" : "Incomplete"));
-        
-        double remainingAmount = premiumCharge - paidAmount;
-        System.out.println("Remaining Amount to be Paid: " + remainingAmount);
-        
-        if (isFullPayment) {
-            System.out.println("Discount Amount: " + discountAmount);
-        }
+        System.out.println(this.toString());
+    }
+    
+    @Override
+    public String toString() {
+        return super.toString() +
+               "\nPersonal Trainer: " + personalTrainer +
+               "\nPaid Amount: " + paidAmount +
+               "\nPayment Status: " + (isFullPayment ? "Complete" : "Incomplete") +
+               "\nRemaining Amount: " + (premiumCharge - paidAmount) +
+               (isFullPayment ? "\nDiscount Applied: " + discountAmount : "");
     }
 }
