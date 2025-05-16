@@ -1,4 +1,2 @@
 ID    Name            Location        Phone           Email                     Membership Start Date Plan       Price      Attendance Loyalty Points  Active Status Full Payment    Discount Amount Net Amount Paid
-01    Darshan         Pokhara         9748212381      darshan.regmi.a24@icp.edu.np 2025-06-24           Standard   2000.00    0          0               false      true            0.00            2000.00        
-01    Darshan         Pokhara         9748212381      darshan.regmi.a24@icp.edu.np 2025-06-24           Standard   2000.00    0          0               false      true            0.00            2000.00        
-02    cbdhxnjm        cgdhsxjz        1234567890      vbadsjbjdasn@gmail.com    2025-04-23           Premium    50000.00   0          0               false      false           0.00            0.00           
+1     Darshan Regmi   Pokhara         9748212381      darshan.regmi.a24@icp     2025-05-15           basic      6500.00    0          0               false      true            0.00            6500.00        

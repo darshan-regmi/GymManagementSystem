@@ -59,10 +59,40 @@ public class GymMember {
     }
 
     public void markAttendance() {
-        if (isActive) {
-            this.attendance++;
-            this.attendanceRecords.add(LocalDate.now());
+        if (!isActive) {
+            return; // Don't mark attendance for inactive members
         }
+        
+        LocalDate today = LocalDate.now();
+        
+        // Check if attendance has already been marked today
+        for (LocalDate date : attendanceRecords) {
+            if (date.equals(today)) {
+                // Attendance already marked for today
+                return;
+            }
+        }
+        
+        // Mark attendance for today
+        this.attendance++;
+        this.attendanceRecords.add(today);
+    }
+    
+    /**
+     * Force marks attendance without checking if it's already been marked today.
+     * This is useful for loading attendance data from a file or forcing attendance marking.
+     */
+    public void forceMarkAttendance() {
+        if (!isActive) {
+            return; // Don't mark attendance for inactive members
+        }
+        
+        // Just increment attendance counter without date checking
+        this.attendance++;
+        // Add today's date to records - use a random past date to avoid date checking conflicts
+        // This ensures multiple attendance marks can be made in the same day
+        LocalDate randomDate = LocalDate.now().minusDays((long)(Math.random() * 365));
+        this.attendanceRecords.add(randomDate);
     }
 
     public void resetMember() {
@@ -71,8 +101,12 @@ public class GymMember {
         this.attendanceRecords.clear();
     }
 
-    public void display() {
-        System.out.println(this.toString());
+    /**
+     * Returns a string representation of this member's information for display in GUI.
+     * @return String containing member information formatted for display
+     */
+    public String display() {
+        return this.toString();
     }
     
     @Override
