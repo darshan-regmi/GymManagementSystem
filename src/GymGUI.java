@@ -34,7 +34,6 @@ public class GymGUI extends JFrame {
         members = new ArrayList<>();
         setTitle("Gym Management System");
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        // Add window listener to save data when closing
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -43,17 +42,16 @@ public class GymGUI extends JFrame {
             }
         });
         initializeComponents();
-        loadMembersFromFile(); // Load members when application starts
+        loadMembersFromFile();
         pack();
         setLocationRelativeTo(null);
         setMinimumSize(new Dimension(800, 600));
         getContentPane().setBackground(SECONDARY_COLOR);
         setVisible(true);
     }
-    
-    // Method to save members to file when the program closes
+
     private void saveMembersToFile() {
-        saveToFile(); // Call the existing saveToFile method
+        saveToFile();
     }
 
     private JPanel createStyledPanel() {
@@ -206,7 +204,7 @@ public class GymGUI extends JFrame {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Create button panels (split into two rows for better organization)
+        // Create button panels
         JPanel buttonPanelContainer = createStyledPanel();
         buttonPanelContainer.setLayout(new GridLayout(2, 1, 5, 5));
 
@@ -398,7 +396,12 @@ public class GymGUI extends JFrame {
         }
     }
     
-    // Validate that all required fields are filled
+    /**
+     * Validates that all required fields are filled with data.
+     * Shows appropriate error messages for missing fields.
+     * 
+     * @return true if all required fields are filled, false otherwise
+     */
     private boolean validateRequiredFields() {
         if (idField.getText().trim().isEmpty()) {
             showError("Member ID cannot be empty!");
@@ -478,7 +481,12 @@ public class GymGUI extends JFrame {
         showSuccess("Attendance marked successfully!");
     }
     
-    // Helper method to force attendance marking regardless of date
+    /**
+     * Forces attendance marking for a member regardless of date restrictions.
+     * For Regular members, also adds loyalty points with each attendance.
+     * 
+     * @param member The GymMember object to mark attendance for
+     */
     private void forceMarkAttendance(GymMember member) {
         if (member == null) return;
         
@@ -765,6 +773,7 @@ public class GymGUI extends JFrame {
                 }
                 // Safely show success message
                 if (writer != null) {
+                    showSuccess("Data Saved to file sucessfully");
                 }
             }
         } catch (SecurityException e) {
@@ -815,48 +824,57 @@ public class GymGUI extends JFrame {
         }
     }
 
-    // New method to load members from file when application starts
+    /**
+     * Loads member data from the MemberDetails.txt file when the application starts.
+     * This method reads each line from the file, parses the fixed-width formatted data,
+     * and creates appropriate member objects (Regular or Premium) based on the data.
+     * If the file doesn't exist or can't be read, the method returns silently.
+     */
     private void loadMembersFromFile() {
+        // Create file object pointing to the member data file
         File file = new File("MemberDetails.txt");
+        // Check if file exists and is readable before proceeding
         if (!file.exists() || !file.canRead()) {
-            return; // No file to load or can't read
+            return; // No file to load or can't read, exit silently
         }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-            // Skip the header line
+            // Skip the header line which contains column names
             reader.readLine();
 
+            // Create formatter for parsing date strings
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             
-            // Use a CSV parser-like approach for better handling of spaces in fields
+            // Process each line in the file
             while ((line = reader.readLine()) != null && !line.trim().isEmpty()) {
                 try {
-                    // Split the line into columns based on fixed width format
-                    // This is more robust than splitting by whitespace
-                    if (line.length() < 50) continue; // Skip too short lines
+                    // Skip lines that are too short to contain valid data
+                    if (line.length() < 50) continue;
                     
+                    // Extract member basic information using fixed-width positions
                     String id = line.substring(0, 5).trim();
                     String name = line.substring(5, 20).trim();
                     String location = line.substring(20, 35).trim();
                     String phone = line.substring(35, 50).trim();
                     String email = line.substring(50, 75).trim();
                     
-                    // Parse dates with proper error handling
+                    // Extract and parse membership start date
                     String startDateStr = line.substring(75, 95).trim();
                     LocalDate membershipStartDate;
-                    LocalDate dob = LocalDate.now().minusYears(20); // Default age if not available
+                    // Use default date of birth (20 years ago) since it's not stored in the file
+                    LocalDate dob = LocalDate.now().minusYears(20);
                     
                     try {
+                        // Parse the membership start date
                         membershipStartDate = LocalDate.parse(startDateStr, formatter);
                     } catch (Exception e) {
-                        // If date parsing fails, use current date
+                        // If date parsing fails, use current date as fallback
                         membershipStartDate = LocalDate.now();
                     }
                     
-                    // Extract remaining fields with proper error handling
+                    // Initialize member attributes with default values
                     String plan = "";
-                    // Using primitive types with sensible defaults
                     int attendance = 0;
                     int loyaltyPoints = 0;
                     boolean isActive = false;
@@ -864,11 +882,14 @@ public class GymGUI extends JFrame {
                     double netAmount = 0.0;
                     
                     try {
+                        // Continue parsing remaining fields with position tracking
                         int currentPos = 95;
+                        
+                        // Extract and validate membership plan
                         plan = line.substring(currentPos, currentPos + 10).trim();
-                        // Ensure plan is one of the valid options
+                        // Ensure plan is one of the valid options, or normalize to closest match
                         if (!plan.equals("Basic") && !plan.equals("Standard") && !plan.equals("Deluxe") && !plan.equals("Premium")) {
-                            // Try to match to the closest valid plan
+                            // Map partial plan names to valid plans
                             if (plan.startsWith("B") || plan.startsWith("b")) {
                                 plan = "Basic";
                             } else if (plan.startsWith("S") || plan.startsWith("s")) {
@@ -881,24 +902,29 @@ public class GymGUI extends JFrame {
                         }
                         currentPos += 10;
                         
-                        // Skip plan price as it's not needed
+                        // Skip plan price field (10 characters)
                         currentPos += 10;
                         
+                        // Parse attendance count
                         attendance = Integer.parseInt(line.substring(currentPos, currentPos + 10).trim());
                         currentPos += 10;
                         
+                        // Parse loyalty points (for Regular members)
                         loyaltyPoints = Integer.parseInt(line.substring(currentPos, currentPos + 15).trim());
                         currentPos += 15;
                         
+                        // Parse active status
                         isActive = Boolean.parseBoolean(line.substring(currentPos, currentPos + 10).trim());
                         currentPos += 10;
                         
+                        // Parse full payment status (for Premium members)
                         isFullPayment = Boolean.parseBoolean(line.substring(currentPos, currentPos + 15).trim());
                         currentPos += 15;
                         
-                        // Skip discount amount as it's not needed
+                        // Skip discount amount field (15 characters)
                         currentPos += 15;
                         
+                        // Parse net amount paid if available
                         if (currentPos < line.length()) {
                             netAmount = Double.parseDouble(line.substring(currentPos).trim());
                         }
@@ -906,24 +932,28 @@ public class GymGUI extends JFrame {
                         // Continue with default values if parsing fails
                     }
                     
-                    // Randomly assign gender for demonstration (in a real app, you'd store this)
+                    // Assign random gender since it's not stored in the file
+                    // In a production app, gender would be stored in the file
                     String gender = Math.random() > 0.5 ? "Male" : "Female";
                     
-                    // Create appropriate member type
+                    // Create appropriate member object based on plan type
                     GymMember member;
                     if (plan.equalsIgnoreCase("Premium")) {
-                        // Use a meaningful trainer name
+                        // For Premium members, extract or use default trainer name
                         String trainerName = "Default Trainer";
                         if (line.length() > 200) {
                             trainerName = line.substring(200, 220).trim();
                             if (trainerName.isEmpty()) trainerName = "Default Trainer";
                         }
                         
+                        // Create Premium member with extracted data
                         member = new PremiumMember(id, name, location, phone, email, gender,
                                 dob, membershipStartDate, trainerName);
 
+                        // Cast to PremiumMember to access specific methods
                         PremiumMember pm = (PremiumMember) member;
-                        // Set payment details
+                        
+                        // Set payment details for Premium member
                         if (netAmount > 0) {
                             pm.payDueAmount(netAmount);
                         }
@@ -931,52 +961,58 @@ public class GymGUI extends JFrame {
                             pm.calculateDiscount();
                         }
                     } else {
-                        // Regular member
-                        // Use a meaningful referral source
+                        // For Regular members, extract or use default referral source
                         String referralSource = "Direct";
                         if (line.length() > 220) {
                             referralSource = line.substring(220, 240).trim();
                             if (referralSource.isEmpty()) referralSource = "Direct";
                         }
                         
+                        // Create Regular member with extracted data
                         member = new RegularMember(id, name, location, phone, email, gender,
                                 dob, membershipStartDate, plan, referralSource);
 
-                        // Set loyalty points directly using the setter method
+                        // Set loyalty points for Regular member
                         RegularMember rm = (RegularMember) member;
                         rm.setLoyaltyPoints(loyaltyPoints);
                     }
 
-                    // Set common properties
+                    // Set membership status for any member type
                     if (isActive) {
                         member.activateMembership();
                     }
 
-                    // Set attendance using forceMarkAttendance to ensure it's properly tracked
+                    // Recreate attendance history by calling forceMarkAttendance
+                    // the appropriate number of times
                     for (int i = 0; i < attendance; i++) {
                         member.forceMarkAttendance();
                     }
 
-                    // Add to members list
+                    // Add the fully configured member to the members list
                     members.add(member);
                 } catch (Exception e) {
-                    // Skip this line if any error occurs during parsing
+                    // Log parsing errors but continue processing other lines
                     System.err.println("Error parsing line: " + line + ", Error: " + e.getMessage());
                 }
             }
-            
-            if (!members.isEmpty()) {
-            }
         } catch (FileNotFoundException e) {
-            // File not found, but we already checked existence, so this is unlikely
+            // This should rarely happen since we check file existence earlier
             System.err.println("File not found: " + e.getMessage());
         } catch (IOException e) {
+            // Show error for IO issues
             showError("Error loading members from file: " + e.getMessage());
         } catch (Exception e) {
+            // Show error for any other unexpected issues
             showError("Unexpected error while loading members: " + e.getMessage());
         }
     }
 
+    /**
+     * Finds a gym member by their ID.
+     * 
+     * @param id The ID of the member to find
+     * @return The GymMember object if found, null otherwise
+     */
     private GymMember findMemberById(String id) {
         for (GymMember member : members) {
             if (member.getId().equals(id)) {
@@ -986,10 +1022,20 @@ public class GymGUI extends JFrame {
         return null;
     }
 
+    /**
+     * Displays an error message dialog to the user.
+     * 
+     * @param message The error message to display
+     */
     private void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
+    /**
+     * Displays a success message dialog to the user.
+     * 
+     * @param message The success message to display
+     */
     private void showSuccess(String message) {
         JOptionPane.showMessageDialog(this, message, "Success", JOptionPane.INFORMATION_MESSAGE);
     }
